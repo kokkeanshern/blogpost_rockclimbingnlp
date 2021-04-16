@@ -9,11 +9,11 @@ from selenium.common.exceptions import TimeoutException
 import re
 
 # Uncomment this to use Chrome in headless mode.
-options = Options()
-options.headless = True
+# options = Options()
+# options.headless = True
 
 # Initialize the webdriver.
-driver_path = "C:\\Users\\Shern\\PycharmProjects\\DS Projects\\Rock Climbing Reviews\\chromedriver_win32\\chromedriver.exe"
+driver_path = r"C:\Users\Shern\PycharmProjects\DS Projects\Rock Climbing Reviews\chromedriver_win32\chromedriver.exe"
 # driver = webdriver.Chrome(options=options,executable_path=driver_path)
 driver = webdriver.Chrome(executable_path=driver_path)
 driver.implicitly_wait(5)
@@ -39,18 +39,20 @@ def get_all_urls():
 		# get_attribute() to get all href
 		link = link.get_attribute('href')
 		if (type(link) == str) and ('climbing' in link) and ('shoe' in link):
-			write_to_file('links2.txt',link)
+			write_to_file('links.txt',link)
 
 def iterate_pages():
 	pages = driver.find_elements_by_class_name("a-normal")
 	last_page = int(pages[-1].text)
 	base_url = driver.current_url
-	print(last_page)
-	for page in range(2,last_page):
+	for page in range(2,last_page+1):
 		get_all_urls()
 		driver.get(base_url+'&page='+str(page))
-	driver.quit()
 
 
-search_product(base_url,'ocun climbing shoe')
-iterate_pages()
+brands = ['la sportiva','ocun','five ten','tenaya','black diamond',
+		  'scarpa','mad rock','climb x']
+for brand in brands:
+	search_product(base_url,brand+' climbing shoe')
+	iterate_pages()
+driver.quit()
