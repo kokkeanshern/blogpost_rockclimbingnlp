@@ -16,7 +16,7 @@ import re
 driver_path = r"C:\Users\Shern\PycharmProjects\DS Projects\Rock Climbing Reviews\chromedriver_win32\chromedriver.exe"
 # driver = webdriver.Chrome(options=options,executable_path=driver_path)
 driver = webdriver.Chrome(executable_path=driver_path)
-driver.implicitly_wait(5)
+driver.implicitly_wait(30)
 
 # Base URL.
 base_url = "https://www.amazon.com/"
@@ -43,11 +43,14 @@ def get_all_urls():
 
 def iterate_pages():
 	pages = driver.find_elements_by_class_name("a-normal")
-	last_page = int(pages[-1].text)
-	base_url = driver.current_url
-	for page in range(2,last_page+1):
+	try:
+		last_page = int(pages[-1].text)
+		base_url = driver.current_url
+		for page in range(2,last_page+1):
+			get_all_urls()
+			driver.get(base_url+'&page='+str(page))
+	except IndexError:
 		get_all_urls()
-		driver.get(base_url+'&page='+str(page))
 
 
 brands = ['la sportiva','ocun','five ten','tenaya','black diamond',
