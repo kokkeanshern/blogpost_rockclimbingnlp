@@ -1,21 +1,21 @@
 import re
 
-# Ensures that:
-# 1. Sponsored product URLs are removed.
-# 2. Results page URLs are removed.
-# 3. URLs that do not start with https://www.amazon.com are removed.
-# 4. URLs with gp or ap following the base URL are removed.
+# Initial filtering
 def filter_links(filename):
     with open(filename, "r") as f:
         lines = f.readlines()
     with open(filename, "w") as f:
         for line in lines:
+            # Remove sponsored product URLs.
             if re.search('slredirect',line.strip("\n")):
                 pass
+            # Remove results page URLs.
             elif re.search('s?k=',line.strip("\n")):
                 pass
+            # Remove URLs that do not start with base URL.
             elif not line.strip("\n").startswith("https://www.amazon.com"):
                 pass
+            # Remove URLs with gp or ap following its base URL.
             elif re.search('https://www.amazon.com/gp/',line.strip("\n")):
                 pass
             elif re.search('https://www.amazon.com/ap/',line.strip("\n")):
