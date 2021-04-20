@@ -7,13 +7,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 import re
+from selenium.common.exceptions import StaleElementReferenceException
 
 
 # Initialize the webdriver.
 def driver_setup():
 	driver_path = r"C:\Users\Shern\PycharmProjects\DS Projects\Rock Climbing Reviews\chromedriver_win32\chromedriver.exe"
 	driver = webdriver.Chrome(executable_path=driver_path)
-	driver.implicitly_wait(15)
+	driver.implicitly_wait(30)
 	return driver
 
 # Write to file.
@@ -74,21 +75,21 @@ def get_productprice(driver):
 		return product_price
 
 # Scrapes product reviews.
-def get_productreviews(driver):
+def get_productreviews(driver,collection):
+	product_reviews = []
 	try:
 		see_all_reviews_button = driver.find_element(By.XPATH,'//*[@id="reviews-medley-footer"]/div[2]/a')
 		see_all_reviews_button.click()
 
 		next_page = True
-		product_reviews = []
+		# Click translate reviews button.
+		try:
+			translate_button = driver.find_element(By.XPATH,'/html/body/div[1]/div[3]/div/div[1]/div/div[1]/div[5]/div[3]/div/div[1]/span/a')
+			translate_button.click()
+		except NoSuchElementException:
+			print("no translate button found.")
+			pass
 		while next_page:
-			# Click translate reviews button.
-			try:
-				translate_button = driver.find_element(By.XPATH,'/html/body/div[1]/div[3]/div/div[1]/div/div[1]/div[5]/div[3]/div/div[1]/span/a')
-				translate_button.click()
-			except NoSuchElementException:
-				print("no translate button found.")
-				pass
 			
 			# Scrape all reviews on the current page.
 			reviews = driver.find_elements(By.XPATH,'//span[@data-hook="review-body"]')
@@ -99,8 +100,6 @@ def get_productreviews(driver):
 			try:
 				next_page_button = driver.find_element(By.CSS_SELECTOR,"#cm_cr-pagination_bar > ul > li.a-last > a")
 				next_page_button.click()
-
-				print(next_page_button.get_attribute('href'))
 
 			except NoSuchElementException:
 				print("No next page button found.")
@@ -115,4 +114,11 @@ def get_productreviews(driver):
 	return product_reviews, num_reviews
 
 
-	
+# Scrapes product reviews.
+def get_review_links(driver):
+	try:
+		see_all_reviews_button = driver.find_element(By.XPATH,'//*[@id="reviews-medley-footer"]/div[2]/a')
+		reviews_url = see_all_reviews_button.get_attribute("href")
+	except NoSuchElementException:
+		reviews_url = None
+	return reviews_url
