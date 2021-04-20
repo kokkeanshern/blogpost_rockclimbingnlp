@@ -62,12 +62,21 @@ import datatransfer as dt
 #     dt.update_mongodb_addfield(collection,{"url":url.strip("\n")},"product_price",product_price)
 
 # Update MongoDB with reviews URL.
+# driver = scraper.driver_setup()
+# collection = dt.mongodb_setup('C:\\Users\\Shern\\mongopwd.txt')
+# with open ("links.txt","r") as f:
+#     lines = f.readlines()
+# for url in lines:
+#     scraper.search_product(driver,url.strip("\n"),'')
+#     reviews_link = scraper.get_review_links(driver)
+#     query_doc = {"url":url.strip("\n")}
+#     dt.update_mongodb_addfield(collection,query_doc,"reviews_url",reviews_link)
+
+collection = dt.mongodb_setup('C:\\Users\\Shern\\mongopwd.txt',"products")
 driver = scraper.driver_setup()
-collection = dt.mongodb_setup('C:\\Users\\Shern\\mongopwd.txt')
-with open ("links.txt","r") as f:
-    lines = f.readlines()
-for url in lines:
-    scraper.search_product(driver,url.strip("\n"),'')
-    reviews_link = scraper.get_review_links(driver)
-    query_doc = {"url":url.strip("\n")}
-    dt.update_mongodb_addfield(collection,query_doc,"reviews_url",reviews_link)
+dist_reviews = dt.get_distinct(collection,"reviews_url")
+for url in dist_reviews:
+    if url != None:
+        scraper.search_product(driver,url,'')
+        product_reviews = scraper.get_productreviews(driver)
+        dt.update_mongodb_addfield(collection,{"reviews_url":url},"reviews",product_reviews)

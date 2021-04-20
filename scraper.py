@@ -13,8 +13,10 @@ from selenium.common.exceptions import StaleElementReferenceException
 # Initialize the webdriver.
 def driver_setup():
 	driver_path = r"C:\Users\Shern\PycharmProjects\DS Projects\Rock Climbing Reviews\chromedriver_win32\chromedriver.exe"
-	driver = webdriver.Chrome(executable_path=driver_path)
-	driver.implicitly_wait(30)
+	options = Options()
+	options.add_argument('--headless')
+	driver = webdriver.Chrome(executable_path=driver_path,chrome_options=options)
+	driver.implicitly_wait(5)
 	return driver
 
 # Write to file.
@@ -75,43 +77,39 @@ def get_productprice(driver):
 		return product_price
 
 # Scrapes product reviews.
-def get_productreviews(driver,collection):
+def get_productreviews(driver):
+	start = time.time()
 	product_reviews = []
+	next_page = True
+	# Click translate reviews button.
 	try:
-		see_all_reviews_button = driver.find_element(By.XPATH,'//*[@id="reviews-medley-footer"]/div[2]/a')
-		see_all_reviews_button.click()
+		translate_button = driver.find_element(By.XPATH,'/html/body/div[1]/div[3]/div/div[1]/div/div[1]/div[5]/div[3]/div/div[1]/span/a')
+		translate_button.click()
+		print("Translate button clicked.")
+	except (NoSuchElementException, StaleElementReferenceException):
+		print("no translate button found.")
+		pass
+	while next_page:
+		# Scrape all reviews on the current page.
+		reviews = driver.find_elements(By.XPATH,'//span[@data-hook="review-body"]')
+		for review in reviews:
+			product_reviews.append(review.text)
+		print("all reviews on current page scraped.")
 
-		next_page = True
-		# Click translate reviews button.
+		# Go to next page.
 		try:
-			translate_button = driver.find_element(By.XPATH,'/html/body/div[1]/div[3]/div/div[1]/div/div[1]/div[5]/div[3]/div/div[1]/span/a')
-			translate_button.click()
+			next_page_button = driver.find_element(By.CSS_SELECTOR,"#cm_cr-pagination_bar > ul > li.a-last > a")
+			next_page_button.click()
+			print("Went to next page.")
+
 		except NoSuchElementException:
-			print("no translate button found.")
-			pass
-		while next_page:
-			
-			# Scrape all reviews on the current page.
-			reviews = driver.find_elements(By.XPATH,'//span[@data-hook="review-body"]')
-			for review in reviews:
-				product_reviews.append(review.text)
+			print("No next page button found.")
+			next_page = False
+		
+		end = time.time()
+		print("Elapsed time for current iteration: "+str((end-start))+" seconds.")
+		return product_reviews
 
-			# Go to next page.
-			try:
-				next_page_button = driver.find_element(By.CSS_SELECTOR,"#cm_cr-pagination_bar > ul > li.a-last > a")
-				next_page_button.click()
-
-			except NoSuchElementException:
-				print("No next page button found.")
-				next_page = False
-
-	except NoSuchElementException:
-		print("see all reviews button not found.")
-		product_reviews = []
-	
-	num_reviews = len(product_reviews)
-
-	return product_reviews, num_reviews
 
 
 # Scrapes product reviews.
