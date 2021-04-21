@@ -1,6 +1,7 @@
 import scraper
 import datacleaning as dc
 import datatransfer as dt
+import analysis as al
 
 # Scraping all URLs for the brands in consideration.
 # brands = ['la sportiva','ocun','five ten','tenaya','black diamond',
@@ -98,3 +99,14 @@ import datatransfer as dt
 #         review_cleaned_arr.append(cleaned_review)
 #     dt.update_mongodb_addfield(collection,{"_id":document["_id"]},"cleaned_reviews",review_cleaned_arr)
         
+# Display but do not save piechart.
+collection = dt.mongodb_setup('C:\\Users\\Shern\\mongopwd.txt',"products")
+dictionary = {"black diamond" : 0,"climb x": 0, "evolv":0,
+              "five ten":0, "la sportiva":0, "mad rock":0,
+              "ocun":0, "scarpa":0, "tenaya":0}
+
+for document in collection.find({"reviews":{"$exists":True}}):
+    num_reviews = len(document['reviews'])
+    brand = document['brand']
+    dictionary[brand] += num_reviews
+al.create_barchart(list(dictionary.values()),list(dictionary.keys()),False)
