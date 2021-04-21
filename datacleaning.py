@@ -1,5 +1,7 @@
 import re
 from colour import Color
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize 
 
 # Initial filtering
 def filter_links(filename):
@@ -151,3 +153,17 @@ def get_model(product_name):
         product_model = ' '.join(product_model)
     
     return product_model
+
+
+def initialize_stopwords():
+    stop_words = set(stopwords.words('english'))
+    return stop_words
+
+def remove_stopwords(review,stop_words):
+    cleaned_review = []
+    review_tokens = word_tokenize(review)
+
+    for w in review_tokens: 
+        if w not in stop_words: 
+            cleaned_review.append(w)
+    return ' '.join(cleaned_review)

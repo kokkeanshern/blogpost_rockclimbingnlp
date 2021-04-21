@@ -87,3 +87,14 @@ import datatransfer as dt
 # for product_name in all_prods:
 #     product_model = dc.get_model(product_name)
 #     dt.update_mongodb_addfield(collection,{"product_name":product_name},"model",product_model)
+
+# Data Cleaning
+# collection = dt.mongodb_setup('C:\\Users\\Shern\\mongopwd.txt',"products")
+# stop_words = dc.initialize_stopwords()
+# for document in collection.find({"reviews":{"$exists":True}}):
+#     review_cleaned_arr = []
+#     for review in document['reviews']:
+#         cleaned_review = dc.remove_stopwords(review, stop_words)
+#         review_cleaned_arr.append(cleaned_review)
+#     dt.update_mongodb_addfield(collection,{"_id":document["_id"]},"cleaned_reviews",review_cleaned_arr)
+        
