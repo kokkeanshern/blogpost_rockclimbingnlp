@@ -72,11 +72,18 @@ import datatransfer as dt
 #     query_doc = {"url":url.strip("\n")}
 #     dt.update_mongodb_addfield(collection,query_doc,"reviews_url",reviews_link)
 
-collection = dt.mongodb_setup('C:\\Users\\Shern\\mongopwd.txt',"products")
-driver = scraper.driver_setup()
-dist_reviews = dt.get_distinct(collection,"reviews_url")
-for url in dist_reviews:
-    if url != None:
-        scraper.search_product(driver,url,'')
-        product_reviews = scraper.get_productreviews(driver)
-        dt.update_mongodb_addfield(collection,{"reviews_url":url},"reviews",product_reviews)
+# collection = dt.mongodb_setup('C:\\Users\\Shern\\mongopwd.txt',"products")
+# driver = scraper.driver_setup()
+# dist_reviews = dt.get_distinct(collection,"reviews_url")
+# for url in dist_reviews:
+#     if url != None:
+#         scraper.search_product(driver,url,'')
+#         product_reviews = scraper.get_productreviews(driver)
+#         dt.update_mongodb_addfield(collection,{"reviews_url":url},"reviews",product_reviews)
+
+# Updates MongoDB database with brand/model field.
+# collection = dt.mongodb_setup('C:\\Users\\Shern\\mongopwd.txt',"products")
+# all_prods = collection.find({"reviews_url":{"$ne":None}}).distinct("product_name")
+# for product_name in all_prods:
+#     product_model = dc.get_model(product_name)
+#     dt.update_mongodb_addfield(collection,{"product_name":product_name},"model",product_model)
