@@ -101,12 +101,36 @@ import analysis as al
         
 # Display but do not save piechart.
 collection = dt.mongodb_setup('C:\\Users\\Shern\\mongopwd.txt',"products")
-dictionary = {"black diamond" : 0,"climb x": 0, "evolv":0,
+dictionary_models = {"black diamond" : 0,"climb x": 0, "evolv":0,
               "five ten":0, "la sportiva":0, "mad rock":0,
               "ocun":0, "scarpa":0, "tenaya":0}
+dictionary_reviews = {"black diamond" : 0,"climb x": 0, "evolv":0,
+              "five ten":0, "la sportiva":0, "mad rock":0,
+              "ocun":0, "scarpa":0, "tenaya":0}
+# Find number of unique models for each brand then update dictionary_models values.
+for model in list(dictionary_models.keys()):
+    num_models = len(collection.distinct("model",{"$and":[{"brand":model},{"model":{"$ne":None}}]}))
+    dictionary_models[model] += num_models
 
-for document in collection.find({"reviews":{"$exists":True}}):
-    num_reviews = len(document['reviews'])
-    brand = document['brand']
-    dictionary[brand] += num_reviews
-al.create_barchart(list(dictionary.values()),list(dictionary.keys()),False)
+# Find nuber of reviews for each brand then update dictionary_reviews values.
+for brand in list(dictionary_reviews.keys()):
+    num_reviews = 0
+    for document in collection.find({"$and":[{"reviews":{"$exists":True}},{"brand":brand}]}):
+        dictionary_reviews[brand] += len(document['reviews'])
+
+
+# al.create_dualbar(list(dictionary_models.keys()),list(dictionary_models.values()),
+#                   list(dictionary_reviews.values()))
+# al.get_summary_stats(list(dictionary_models.keys()),list(dictionary_models.values()),
+#                   list(dictionary_reviews.values()))
+# al.rescale(list(dictionary_models.keys()),list(dictionary_models.values()),
+#                   list(dictionary_reviews.values()))
+# call the min_max_scaling function
+# al.min_max_scaling(list(dictionary_models.keys()),list(dictionary_models.values()),
+#                   list(dictionary_reviews.values()))
+
+# for document in collection.find({"reviews":{"$exists":True}}):
+#     num_reviews = len(document['reviews'])
+#     brand = document['brand']
+#     dictionary[brand] += num_reviews
+# al.create_barchart(list(dictionary.values()),list(dictionary.keys()))
