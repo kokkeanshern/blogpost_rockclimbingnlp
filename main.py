@@ -145,14 +145,9 @@ def analysis_part1():
         dictionary_models[model] += num_models
 
     # Find number of reviews for each brand then update dictionary_reviews values.
-    completed_reviews = []
     for brand in list(dictionary_reviews.keys()):
         for document in collection.find({"brand":brand}):
-            if document['reviews_url'] in completed_reviews:
-                pass
-            else:
-                dictionary_reviews[brand] += document['num_reviews']
-                completed_reviews.append(document['reviews_url'])
+            dictionary_reviews[brand] += document['num_reviews']
 
     # Create a dual-axis bar chart.
     al.create_dualbar(list(dictionary_models.keys()),list(dictionary_models.values()),
@@ -169,7 +164,6 @@ def validate_reviews():
     if doc['num_reviews'] != len(list(set(arr))):
         print("Document with ID "+doc['_id']+" has duplicates.")
 
-validate_reviews()
 # ------------------------------------------------------------------------------------------------------------
 
 # Removes the "ref=" section of the reviews URL.
@@ -177,5 +171,16 @@ def clean_reviews_url():
     for doc in collection.find({}):
         reviews_url = dc.clean_reviewurl(doc['reviews_url'])
         dt.update_mongodb_addfield(collection,{"_id":doc["_id"]},"reviews_url2",reviews_url)
+
+# ------------------------------------------------------------------------------------------------------------
+
+# Keep only one document if filtering for reviews_url2 returns > 1 document.
+def delete_dups():
+    reviews_url = collection.distinct("reviews_url2")
+    for url in reviews_url:
+        num_docs = collection.count_documents({"reviews_url2":url})
+        if num_docs > 1:
+            for x in range(1,num_docs):
+                collection.delete_one({"reviews_url2":url})
 
 # ------------------------------------------------------------------------------------------------------------
