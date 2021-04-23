@@ -108,7 +108,7 @@ def get_productreviews(driver):
 		
 		end = time.time()
 		print("Elapsed time for current iteration: "+str((end-start))+" seconds.")
-		return product_reviews
+	return product_reviews
 
 
 

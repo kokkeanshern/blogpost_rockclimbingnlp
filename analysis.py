@@ -22,3 +22,4 @@ def create_dualbar(brand, models, reviews):
     plt.xticks(rotation=45)
 
     plt.show()
+
