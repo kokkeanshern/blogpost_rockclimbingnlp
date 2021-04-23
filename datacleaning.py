@@ -167,3 +167,7 @@ def remove_stopwords(review,stop_words):
         if w not in stop_words: 
             cleaned_review.append(w)
     return ' '.join(cleaned_review)
+
+def clean_reviewurl(review_url):
+    review_url = review_url.split("ref")[0]
+    return review_url

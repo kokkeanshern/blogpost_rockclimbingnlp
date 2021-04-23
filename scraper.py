@@ -16,6 +16,7 @@ def driver_setup():
 	options = Options()
 	options.add_argument('--headless')
 	driver = webdriver.Chrome(executable_path=driver_path,chrome_options=options)
+	# driver = webdriver.Chrome(executable_path=driver_path)
 	driver.implicitly_wait(5)
 	return driver
 
@@ -77,37 +78,48 @@ def get_productprice(driver):
 		return product_price
 
 # Scrapes product reviews.
-def get_productreviews(driver):
+def get_productreviews(driver,url):
 	start = time.time()
 	product_reviews = []
 	next_page = True
+	page = 2
 	# Click translate reviews button.
 	try:
 		translate_button = driver.find_element(By.XPATH,'/html/body/div[1]/div[3]/div/div[1]/div/div[1]/div[5]/div[3]/div/div[1]/span/a')
 		translate_button.click()
-		print("Translate button clicked.")
+		# print("Translate button clicked.")
 	except (NoSuchElementException, StaleElementReferenceException):
-		print("no translate button found.")
+		# print("no translate button found.")
 		pass
 	while next_page:
 		# Scrape all reviews on the current page.
 		reviews = driver.find_elements(By.XPATH,'//span[@data-hook="review-body"]')
 		for review in reviews:
-			product_reviews.append(review.text)
-		print("all reviews on current page scraped.")
+			try:
+				product_reviews.append(review.text)
+			except StaleElementReferenceException:
+				pass
+			# print("all reviews on current page scraped.")
 
 		# Go to next page.
-		try:
-			next_page_button = driver.find_element(By.CSS_SELECTOR,"#cm_cr-pagination_bar > ul > li.a-last > a")
-			next_page_button.click()
-			print("Went to next page.")
-
-		except NoSuchElementException:
-			print("No next page button found.")
+		if len(reviews) != 0:
+			search_product(driver,url,
+						'ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews&pageNumber='+str(page))
+			page += 1
+		else:
 			next_page = False
+		# try:
+		# 	print("attempting to go to next page")
+		# 	next_page_button = driver.find_element(By.CSS_SELECTOR,"#cm_cr-pagination_bar > ul > li.a-last > a")
+		# 	next_page_button.click()
+		# 	print("Went to next page.")
+
+		# except (NoSuchElementException,StaleElementReferenceException):
+		# 	print("No next page button found.")
+		# 	next_page = False
 		
 		end = time.time()
-		print("Elapsed time for current iteration: "+str((end-start))+" seconds.")
+		# print("Elapsed time for current iteration: "+str((end-start))+" seconds.")
 	return product_reviews
 
 
