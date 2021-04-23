@@ -118,16 +118,8 @@ for brand in list(dictionary_reviews.keys()):
     for document in collection.find({"$and":[{"reviews":{"$exists":True}},{"brand":brand}]}):
         dictionary_reviews[brand] += len(document['reviews'])
 
-
-# al.create_dualbar(list(dictionary_models.keys()),list(dictionary_models.values()),
-#                   list(dictionary_reviews.values()))
-# al.get_summary_stats(list(dictionary_models.keys()),list(dictionary_models.values()),
-#                   list(dictionary_reviews.values()))
-# al.rescale(list(dictionary_models.keys()),list(dictionary_models.values()),
-#                   list(dictionary_reviews.values()))
-# call the min_max_scaling function
-# al.min_max_scaling(list(dictionary_models.keys()),list(dictionary_models.values()),
-#                   list(dictionary_reviews.values()))
+al.create_dualbar(list(dictionary_models.keys()),list(dictionary_models.values()),
+                  list(dictionary_reviews.values()))
 
 # for document in collection.find({"reviews":{"$exists":True}}):
 #     num_reviews = len(document['reviews'])
