@@ -184,3 +184,80 @@ def delete_dups():
                 collection.delete_one({"reviews_url2":url})
 
 # ------------------------------------------------------------------------------------------------------------
+
+# If a model appears more than once in a document, merge the reviews into one document and delete the rest.
+
+def delete_dup_models():
+    # Returns a document {"_id":<model>,"count":<n times model appears in DB>} whereby count > 1
+    pipeline = [{
+        "$group":{
+            "_id":"$model",
+            "count":{
+                "$sum":1
+            }
+        }
+    },
+    {
+        "$match":{
+            "count":{
+                "$gt":1
+            }
+        }
+    }]
+
+    for doc_pipe in collection.aggregate(pipeline):
+        reviews = []
+        # Join reviews for every document whereby model equals model returned from aggregate pipeline.
+        for doc_find in collection.find({"model":doc_pipe["_id"]}):
+            reviews = reviews+doc_find["reviews"]
+        # Update the last duplicate instance with the new reviews list length.
+        myquery = { "_id": doc_find["_id"] }
+        newvalues = { "$set": { "reviews": reviews , "num_reviews": len(reviews)} }
+        collection.update_one(myquery, newvalues)
+
+        # Delete all duplicate instances for each model identified by having fewer reviews than the 
+        # highest instance.
+        myquery = {"model":doc_pipe["_id"],"num_reviews":{"$lt":len(reviews)}}
+        collection.delete_many(myquery)
+
+# ------------------------------------------------------------------------------------------------------------
+
+# Obtain sentiment scores.
+def get_sentiment():
+    for doc in collection.find({}):
+        classification_arr = []
+        compound_arr = []
+        for review in doc["cleaned_reviews"]:
+            classification, compound_score = al.get_sentiment_score(review)
+            classification_arr.append(classification)
+            compound_arr.append(compound_score)
+        dt.update_mongodb_addfield(collection,{"_id":doc["_id"]},"classification",classification_arr)
+        dt.update_mongodb_addfield(collection,{"_id":doc["_id"]},"num_classification",len(classification_arr))
+        dt.update_mongodb_addfield(collection,{"_id":doc["_id"]},"compound_score",compound_arr)
+        dt.update_mongodb_addfield(collection,{"_id":doc["_id"]},"num_compound",len(compound_arr))
+
+# ------------------------------------------------------------------------------------------------------------
+
+# Updates MongoDB with positivity rate.
+def get_posrate():
+    for doc in collection.find({}):
+        pos_rate = al.positivity_rate(doc['classification'], doc['num_reviews'])
+        dt.update_mongodb_addfield(collection,{"_id":doc["_id"]},"pos_rate",pos_rate)
+
+# ------------------------------------------------------------------------------------------------------------
+
+def plot_scatter():
+    pos_rate = []
+    num_reviews =[]
+    model = []
+    for doc in collection.find({"$and":[{"pos_rate":{"$gt":50}},{"num_reviews":{"$lt":300}}]}):
+        pos_rate.append(doc['pos_rate'])
+        num_reviews.append(doc['num_reviews'])
+        model.append(doc['model'])
+
+    al.quad_plot(num_reviews,pos_rate,model)
+
+# ------------------------------------------------------------------------------------------------------------
+
+# Code cleanup
+driver.quit()
